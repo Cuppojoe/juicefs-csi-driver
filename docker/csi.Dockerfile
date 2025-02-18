@@ -1,4 +1,4 @@
-# Copyright 2018 The Kubernetes Authors.
+# Copyright 2018 The Kubernetes Authors.Add commentMore actions
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#speed up the build process by using an image with a pre-built juicefs binary.
+ARG JUICEFS_IMAGE="gcr.io/cpln-build/juicefs:1736066987-cdb3583f"
+FROM  ${JUICEFS_IMAGE} as juicefs
 
 FROM golang:1.23-bookworm AS csi-builder
 ARG GOPROXY
@@ -42,12 +45,18 @@ RUN bash -c "if [[ '${TARGETARCH}' == amd64 ]]; then mkdir -p /home/travis/.m2 &
     wget -q -O- 'https://download.ceph.com/keys/release.asc' | apt-key add - && \
     echo deb https://download.ceph.com/debian-16.2.15/ bullseye main | tee /etc/apt/sources.list.d/ceph.list && \
     apt-get update && apt-get install -y uuid-dev libglusterfs-dev glusterfs-common librados2 librados-dev upx-ucl; fi"
+
 WORKDIR /workspace
+COPY --from=project **/*.go ./
+COPY --from=project cmd ./cmd
+COPY --from=project pkg ./pkg
+COPY --from=project go.mod .
+COPY --from=project go.sum .
+COPY --from=project .git .
+COPY --from=project Makefile .
+ENV GOPROXY=${GOPROXY:-https://proxy.golang.org}
 RUN apt-get update && apt-get install -y musl-tools
-# build juicefs
-RUN cd /workspace && git clone --branch=$JUICEFS_REPO_BRANCH $JUICEFS_REPO_URL && \
-    cd juicefs && git checkout $JUICEFS_REPO_REF && \
-    bash -c "if [[ ${TARGETARCH} == amd64 ]]; then make juicefs.all && mv juicefs.all juicefs; else make juicefs; fi"
+RUN make
 
 FROM python:3.9.21-slim-bullseye
 
@@ -90,7 +99,7 @@ RUN jfs_mount_path=${JFS_MOUNT_PATH} && \
     chmod +x ${jfs_mount_path} && cp juicefs.py ${JUICEFS_CLI} && chmod +x ${JUICEFS_CLI}
 
 COPY --from=csi-builder /workspace/bin/juicefs-csi-driver /usr/local/bin/
-COPY --from=juicefs-builder /workspace/juicefs/juicefs /usr/local/bin/
+COPY --from=juicefs /usr/local/bin/juicefs /usr/local/bin/
 
 RUN ln -s /usr/local/bin/juicefs /bin/mount.juicefs
 
