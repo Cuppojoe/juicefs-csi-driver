@@ -74,7 +74,7 @@ cpln-image-version:
 		--build-arg JUICEFS_EE_MOUNT_IMAGE=$(JUICEFS_IMAGE):$(EE_VERSION) \
 		--build-arg JUICEFS_REPO_BRANCH=$(CE_JUICEFS_VERSION) \
 		--build-arg JUICEFS_REPO_URL=$(JUICEFS_REPO_URL) \
-		--build-arg JUICEFS_IMAGE=$(JUICEFS_IMAGE) \
+		--build-arg JUICEFS_IMAGE=$(JUICEFS_IMAGE):$(CE_VERSION) \
 		--build-context project=.. \
 		--platform $(PLATFORM) -f csi.Dockerfile . --push
 
