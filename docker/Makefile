@@ -30,6 +30,7 @@ ifeq ($(strip $(JFS_PKG_URL)),)
 endif
 JUICEFS_REPO_URL?=https://github.com/juicedata/juicefs
 JUICEFS_REPO_REF?=$(JUICEFS_CE_LATEST_VERSION)
+PLATFORM ?= linux/amd64,linux/arm64
 MOUNT_TAG=${MOUNTTAG}
 CE_VERSION=${CEVERSION}
 CE_JUICEFS_VERSION=${CEJUICEFS_VERSION}
@@ -62,9 +63,9 @@ image-version:
 		--build-arg JUICEFS_CE_MOUNT_IMAGE=$(JUICEFS_IMAGE):$(CE_VERSION) \
 		--build-arg JUICEFS_EE_MOUNT_IMAGE=$(JUICEFS_IMAGE):$(EE_VERSION) \
 		--build-context project=.. \
-		--platform linux/amd64,linux/arm64 -f csi.Dockerfile . --push
+		--platform $(PLATFORM) -f csi.Dockerfile . --push
 
-# IMAGE=public.ecr.aws/cpln-build/juicedata/juicefs-csi-driver CSIVERSION=v1.2.1-cpln JUICEFS_REPO_URL=https://github.com/Cuppojoe/juicefs REGISTRY=public.ecr.aws CEJUICEFS_VERSION=v1.2.1-cpln CEVERSION=v1.2.1-cpln JUICEFS_IMAGE=cpln-build/juicedata/mount make cpln-image-version
+# IMAGE=public.ecr.aws/cpln-build/juicedata/juicefs-csi-driver CSIVERSION=v1.2.1-cpln-1736066987-cdb3583f JUICEFS_REPO_URL=https://github.com/Cuppojoe/juicefs REGISTRY=public.ecr.aws CEJUICEFS_VERSION=v1.2.1-cpln CEVERSION=v1.2.1-cpln JUICEFS_IMAGE=cpln-build/juicedata/mount make cpln-image-version
 # build & push csi version image
 .PHONY: cpln-image-version
 cpln-image-version:
@@ -75,7 +76,7 @@ cpln-image-version:
 		--build-arg JUICEFS_REPO_BRANCH=$(CE_JUICEFS_VERSION) \
 		--build-arg JUICEFS_REPO_URL=$(JUICEFS_REPO_URL) \
 		--build-context project=.. \
-		--platform linux/amd64,linux/arm64 -f csi.Dockerfile . --push
+		--platform $(PLATFORM) -f csi.Dockerfile . --push
 
 .PHONY: push-version
 push-version:
@@ -145,7 +146,7 @@ cpln-ce-image-arm64:
 ce-image-buildx:
 	docker buildx build -f ce.juicefs.Dockerfile -t $(REGISTRY)/$(JUICEFS_IMAGE):$(CE_VERSION) \
 	    --build-arg=JUICEFS_REPO_REF=$(CE_JUICEFS_VERSION) \
-		--platform linux/amd64,linux/arm64 . --push
+		--platform $(PLATFORM) . --push
 
 .PHONY: ce-image-1.1
 ce-image-1.1:
@@ -157,7 +158,7 @@ ce-image-1.1:
 ce-image-1.1-buildx:
 	docker buildx build -f ce.juicefs-1.1.Dockerfile -t $(REGISTRY)/$(JUICEFS_IMAGE):$(CE_VERSION) \
 	    --build-arg=JUICEFS_REPO_REF=$(CE_JUICEFS_VERSION) \
-		--platform linux/amd64,linux/arm64 . --push
+		--platform $(PLATFORM) . --push
 
 ################# JuiceFS ee image #######################
 
@@ -172,13 +173,13 @@ ee-image-buildx:
 	docker buildx build -f ee.juicefs.Dockerfile -t $(REGISTRY)/$(JUICEFS_IMAGE):$(EE_VERSION) \
 	    --build-arg JFSCHAN=$(JFS_CHAN) \
 	    --build-arg JFS_PKG_URL=$(JFS_PKG_URL) \
-		--platform linux/amd64,linux/arm64 . --push
+		--platform $(PLATFORM) . --push
 
 .PHONY: ee-image-4.0-buildx
 ee-image-4.0-buildx:
 	docker buildx build -f ee.juicefs-4.0.Dockerfile -t $(REGISTRY)/$(JUICEFS_IMAGE):$(EE_VERSION) \
 	    --build-arg JFSCHAN=$(JFS_CHAN) \
-		--platform linux/amd64,linux/arm64 . --push
+		--platform $(PLATFORM) . --push
 
 ################# JuiceFS image for dashboard #######################
 .PHONY: dashboard-build

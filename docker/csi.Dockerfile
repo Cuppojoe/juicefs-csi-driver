@@ -1,5 +1,5 @@
-#speed up the build process by useing an image with a pre-built juicefs binary.
-FROM gcr.io/cpln-build/juicefs:1543127132-a0cd88ee as juicefs
+#speed up the build process by using an image with a pre-built juicefs binary.
+FROM gcr.io/cpln-build/juicefs:1736066987-cdb3583f as juicefs
 
 FROM golang:1.22-bookworm AS csi-builder
 ARG GOPROXY
