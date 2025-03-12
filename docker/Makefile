@@ -15,7 +15,6 @@
 IMAGE?=juicedata/juicefs-csi-driver
 REGISTRY?=docker.io
 TARGETARCH?=amd64
-JUICEFS_IMAGE?=juicedata/mount
 VERSION=$(shell git describe --tags --match 'v*' --always --dirty)
 DASHBOARD_IMAGE?=juicedata/csi-dashboard
 DASHBOARD_TAG?=$(VERSION)
@@ -36,7 +35,6 @@ CE_VERSION=${CEVERSION}
 CE_JUICEFS_VERSION=${CEJUICEFS_VERSION}
 EE_VERSION=${EEVERSION}
 CSI_VERSION=${CSIVERSION}
-JUICEFS_IMAGE?=$(REGISTRY)/$(IMAGE):$(CSI_VERSION)
 
 ################# CSI image #######################
 
