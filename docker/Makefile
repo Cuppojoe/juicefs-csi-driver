@@ -125,9 +125,21 @@ ce-image:
 # JUICEFS_REPO_URL=https://github.com/Cuppojoe/juicefs REGISTRY=public.ecr.aws CEJUICEFS_VERSION=v1.2.1-cpln CEVERSION=v1.2.1-cpln JUICEFS_IMAGE=cpln-build/juicedata/mount make cpln-ce-image
 .PHONY: cpln-ce-image
 cpln-ce-image:
-	docker buildx build -f ce.juicefs.Dockerfile -t $(REGISTRY)/$(JUICEFS_IMAGE):$(CE_VERSION) \
+	docker buildx imagetools create --tag $(REGISTRY)/$(JUICEFS_IMAGE):$(CE_VERSION) \
+        $(REGISTRY)/$(JUICEFS_IMAGE):$(CE_VERSION)-amd64 \
+        $(REGISTRY)/$(JUICEFS_IMAGE):$(CE_VERSION)-arm64
+
+.PHONY: cpln-ce-image-amd64
+cpln-ce-image-amd64:
+	docker buildx build -f ce.juicefs.Dockerfile -t $(REGISTRY)/$(JUICEFS_IMAGE):$(CE_VERSION)-amd64 \
         --build-arg JUICEFS_REPO_REF=$(CE_JUICEFS_VERSION) --build-arg JUICEFS_REPO_BRANCH=$(CE_JUICEFS_VERSION) --build-arg JUICEFS_REPO_URL=$(JUICEFS_REPO_URL) \
-		--platform linux/amd64,linux/arm64 . --push
+		--platform linux/amd64 . --push
+
+.PHONY: cpln-ce-image-arm64
+cpln-ce-image-arm64:
+	docker buildx build -f ce.juicefs.Dockerfile -t $(REGISTRY)/$(JUICEFS_IMAGE):$(CE_VERSION)-arm64 \
+        --build-arg JUICEFS_REPO_REF=$(CE_JUICEFS_VERSION) --build-arg JUICEFS_REPO_BRANCH=$(CE_JUICEFS_VERSION) --build-arg JUICEFS_REPO_URL=$(JUICEFS_REPO_URL) \
+		--platform linux/arm64 . --push
 
 .PHONY: ce-image-buildx
 ce-image-buildx:
