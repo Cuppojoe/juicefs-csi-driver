@@ -70,7 +70,7 @@ image-version:
 # build & push csi version image
 .PHONY: cpln-image-version
 cpln-image-version:
-	docker buildx build -t $(IMAGE):$(CSI_VERSION) \
+	docker buildx build -t $(REGISTRY)/$(IMAGE):$(CSI_VERSION) \
         --build-arg JUICEFS_REPO_REF=$(CE_JUICEFS_VERSION) \
 		--build-arg JUICEFS_CE_MOUNT_IMAGE=$(JUICEFS_IMAGE):$(CE_VERSION) \
 		--build-arg JUICEFS_EE_MOUNT_IMAGE=$(JUICEFS_IMAGE):$(EE_VERSION) \
