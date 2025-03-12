@@ -36,6 +36,7 @@ CE_VERSION=${CEVERSION}
 CE_JUICEFS_VERSION=${CEJUICEFS_VERSION}
 EE_VERSION=${EEVERSION}
 CSI_VERSION=${CSIVERSION}
+JUICEFS_IMAGE?=$(REGISTRY)/$(IMAGE):$(CSI_VERSION)
 
 ################# CSI image #######################
 
@@ -75,6 +76,7 @@ cpln-image-version:
 		--build-arg JUICEFS_EE_MOUNT_IMAGE=$(JUICEFS_IMAGE):$(EE_VERSION) \
 		--build-arg JUICEFS_REPO_BRANCH=$(CE_JUICEFS_VERSION) \
 		--build-arg JUICEFS_REPO_URL=$(JUICEFS_REPO_URL) \
+		--build-arg JUICEFS_IMAGE=$(JUICEFS_IMAGE) \
 		--build-context project=.. \
 		--platform $(PLATFORM) -f csi.Dockerfile . --push
 
