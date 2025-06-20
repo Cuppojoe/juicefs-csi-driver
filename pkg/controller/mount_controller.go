@@ -18,7 +18,6 @@ package controller
 
 import (
 	"context"
-
 	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -56,7 +55,11 @@ func (m MountController) Reconcile(ctx context.Context, request reconcile.Reques
 	mountPod, err := m.GetPod(ctx, request.Name, request.Namespace)
 	if err != nil && !k8serrors.IsNotFound(err) {
 		mountCtrlLog.Error(err, "get pod error", "name", request.Name)
-		return reconcile.Result{}, err
+		//What if this is the last event we'll ever get for this pod? We can't allow some random API error to cause
+		//a leaked mount pod. Retry.
+		return reconcile.Result{
+			Requeue: true,
+		}, err
 	}
 	if mountPod == nil {
 		mountCtrlLog.V(1).Info("pod has been deleted.", "name", request.Name)
@@ -88,7 +91,11 @@ func (m MountController) Reconcile(ctx context.Context, request reconcile.Reques
 	}
 	if len(csiPods) > 0 {
 		mountCtrlLog.V(1).Info("csi node exists.", "node", nodeName)
-		return reconcile.Result{}, nil
+		//The mere existence of the csi node pod doesn't guarantee that the mount pod will be properly cleaned up.
+		//We have to keep checking until the pod has actually been deleted.
+		return reconcile.Result{
+			Requeue: true,
+		}, nil
 	}
 
 	mountCtrlLog.Info("csi node did not exist. remove finalizer of pod", "node", nodeName, "name", mountPod.Name)
